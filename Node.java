@@ -47,4 +47,13 @@ class Node {
         return children[childIndex];
     }
 
+    
+    public void insert(int value)
+    {
+        if(!this.isFullSize())
+        {
+        keys[this.numOfElements] = value;
+        this.numOfElements++;
+        }
+    }
 }
