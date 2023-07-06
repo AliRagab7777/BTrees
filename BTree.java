@@ -1,5 +1,8 @@
 package btree;
 
+import java.util.Queue;
+import java.util.ArrayDeque;
+
 public class BTree {
 
     int order;
@@ -56,6 +59,29 @@ public class BTree {
 
         return parent;
 
+    }
+
+    public void displayPreOrder() {
+
+        if (root == null) {
+            return;
+        }
+
+        Queue<Node> q = new ArrayDeque<>();
+
+        q.add(root);
+        while (!q.isEmpty()) {
+
+            for (Node child : q.peek().children) {
+                if (child != null) {
+                    q.add(child);
+                }
+            }
+
+            q.peek().displayNode();
+            q.remove();
+
+        }
     }
 
 }

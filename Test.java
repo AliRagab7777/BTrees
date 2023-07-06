@@ -25,15 +25,12 @@ public class Test {
         b1.insert(33);
         b1.insert(37);
         b1.insert(36);
-        
-        
-        b1.root.displayNode();
-        b1.root.children[0].displayNode();
-        b1.root.children[1].displayNode();
-        b1.root.children[2].displayNode();
-        b1.root.children[3].displayNode();
-        b1.root.children[4].displayNode();  
-        
+        b1.insert(70);
+        b1.insert(80);
+        b1.insert(90);
+     
+        b1.displayPreOrder();
+
     }
 
 }
