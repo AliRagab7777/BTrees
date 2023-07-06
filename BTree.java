@@ -72,9 +72,11 @@ public class BTree {
         q.add(root);
         while (!q.isEmpty()) {
 
-            for (Node child : q.peek().children) {
-                if (child != null) {
-                    q.add(child);
+            //for (Node child : q.peek().children) {
+            for (int i = 0; i <= q.peek().numOfElements; i++) {
+                if (q.peek().children[i] != null) {
+                    q.add(q.peek().children[i]);
+
                 }
             }
 

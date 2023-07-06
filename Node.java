@@ -133,8 +133,8 @@ class Node {
                 temp.children[child_temp_idx - splitIdx].parent = temp;
             }
 
-            temp.numOfElements = this.numOfElements - splitIdx;
-            this.numOfElements = splitIdx;
+            //temp.numOfElements = this.numOfElements - splitIdx;
+            //this.numOfElements = splitIdx;
 
         }
 
