@@ -7,11 +7,20 @@ public class BTree {
     int minOrder;
     boolean evenOrder;
 
-    public BTree(int order) {
+    public BTree(int order) throws InvalidOrderException {
+
+        this.checkOrder(order);
         this.order = order;
         this.minOrder = (int) Math.ceil(order / 2);
         if (this.order % 2 == 0) {
             evenOrder = true;
+        }
+
+    }
+
+    private void checkOrder(int order) throws InvalidOrderException {
+        if (order <= 2) {
+            throw new InvalidOrderException();
         }
     }
 

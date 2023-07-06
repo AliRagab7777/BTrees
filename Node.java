@@ -64,14 +64,81 @@ class Node {
     }
 
     public boolean isRoot() {
-        return this.parent == null;
+        return this == this.bTree.root;
     }
 
     public boolean isLeaf() {
         return this.children[0] == null;
     }
 
+    public boolean hasTemp() {
+        return (this.children[this.order - 1] != null) && (this.numOfElements < this.order - 1);
+    }
+
+    public Node getTemp() {
+        return this.children[this.order - 1];
+
+    }
+
+    public void setTemp(Node temp) {
+        this.children[this.order - 1] = temp;
+
+    }
+
     private void adjustChildren() {
+        int i;
+        for (i = this.numOfElements; i >= 0; i--) {
+            if (this.children[i].hasTemp()) {
+                this.children[i + 1] = this.children[i].getTemp();
+                this.children[i].getTemp().parent = this;
+                this.children[i].setTemp(null);
+                return;
+            }
+
+            this.children[i + 1] = this.children[i];
+        }
+    }
+    
+
+    private void splitChildren() {
+         //Used to split children and create temp node
+         //In case the node is a leaf, will create empty temp node only
+        Node temp = new Node(null, this.order, this.minOrder, this.bTree);
+        if (!this.isLeaf()) {
+            int splitIdx = (int) (Math.ceil((this.order * 1.0) / 2));
+            int i, child_temp_idx = -1, c = 1;
+            for (i = this.numOfElements; i >= 0; i--) {
+                if (this.children[i].hasTemp()) {
+                    c = 0;
+                    child_temp_idx = i + 1;
+                }
+
+                if (i + c < splitIdx) {
+                    this.children[i + c] = this.children[i];
+                } else {
+                    temp.children[i + c - splitIdx] = this.children[i];
+                    this.children[i].parent = temp;
+                }
+            }
+
+            if (child_temp_idx < splitIdx) {
+                this.children[child_temp_idx] = this.children[child_temp_idx - 1].getTemp();
+                this.children[child_temp_idx].parent = this;
+            } else if (child_temp_idx == splitIdx) {
+                temp.children[0] = this.children[child_temp_idx - 1].getTemp();
+                temp.children[0].parent = temp;
+
+            } else {
+                temp.children[child_temp_idx - splitIdx] = temp.children[child_temp_idx - splitIdx - 1].getTemp();
+                temp.children[child_temp_idx - splitIdx].parent = temp;
+            }
+
+            temp.numOfElements = this.numOfElements - splitIdx;
+            this.numOfElements = splitIdx;
+
+        }
+
+        this.setTemp(temp);
 
     }
 
@@ -86,48 +153,47 @@ class Node {
         }
 
         int medianIndex;
-        medianIndex =  (int) (Math.floor(this.order*1.0 / 2 - 0.5));
+        medianIndex = (int) (Math.floor(this.order * 1.0 / 2 - 0.5));
 
-        Node temp = new Node(null, this.order, this.minOrder, this.bTree);
+        Node temp = this.getTemp();
         int splitIndex = medianIndex + 1;
         int i, c = 1;
-        
-        for(i = this.numOfElements - 1; i >= 0;i--)
-        {
-            
-            
-            if(i < valueIndex)
+
+        for (i = this.numOfElements - 1; i >= 0; i--) {
+
+            if (i < valueIndex) {
                 c = 0;
+            }
 
             if ((i + c) > medianIndex) {
-                temp.keys[i+c - splitIndex] = this.keys[i];
-            }
-            else if (c == 1 && (i + c) <= medianIndex) {
+                temp.keys[i + c - splitIndex] = this.keys[i];
+            } else if (c == 1 && (i + c) <= medianIndex) {
                 this.keys[i + c] = this.keys[i];
-            }     
+            }
         }
-      
+
         temp.numOfElements = (int) Math.floor(this.order / 2);
-        this.numOfElements = this.order -1 - temp.numOfElements;
-        
-        
-        if(valueIndex <= medianIndex)
+        this.numOfElements = this.order - 1 - temp.numOfElements;
+
+        if (valueIndex <= medianIndex) {
             this.keys[valueIndex] = value;
-        else if(valueIndex > medianIndex)
+        } else if (valueIndex > medianIndex) {
             temp.keys[valueIndex - splitIndex] = value;
-        
-        this.children[this.order - 1] = temp;
-        
-        return this.keys[medianIndex]; 
+        }
+
+        this.setTemp(temp);
+
+        return this.keys[medianIndex];
     }
 
     public void insert(int value) {
-        //Case: Leaf is not full
+        //Case: Node is not full
         if (!this.isFullSize()) {
             if (!isLeaf()) {
                 this.adjustChildren();
             }
 
+            //Insertion Sort
             keys[this.numOfElements] = value;
             this.numOfElements++;
 
@@ -138,26 +204,24 @@ class Node {
             }
             keys[i] = value;
 
-        } //Case: Leaf is full
+        } //Case: Node is full
         else {
-            
+
+            this.splitChildren(); 
             int median = this.splitKeys(value);
-            if(this.isRoot())
-            {
-                Node newRoot = new Node(null,this.order,this.minOrder,this.bTree);
-                
-                //root.insert or btree.insert;
-                newRoot.keys[0] = median;
-                newRoot.numOfElements = 1;
+            if (this.isRoot()) {
+                Node newRoot = new Node(null, this.order, this.minOrder, this.bTree);
+
+                newRoot.insert(median);
                 newRoot.children[0] = this;
-                newRoot.children[1] = this.children[this.order - 1];
+                newRoot.children[1] = this.getTemp();
                 this.parent = newRoot;
-                this.children[this.order - 1].parent = newRoot;
-                this.children[this.order - 1] = null;
+                this.getTemp().parent = newRoot;
+                this.setTemp(null);
                 this.bTree.root = newRoot;
-             }
-            else
+            } else {
                 this.parent.insert(median);
+            }
 
         }
 
